@@ -151,11 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="task-definition" class="level2">
 <h2 class="anchored" data-anchor-id="task-definition">Task definition</h2>
-<p><strong>YOUR TASK</strong> (<em>should you choose to accept it</em>) is to create a raster dataset with a 100 m resolution in the coordinate system <a href="https://epsg.io/2056"><code>EPSG:2056</code></a> with the extent as provided in the raster mask (see below). The cell values should range from 0 to 100 (0 to 1 uses more disk space<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>) and describe the normalized tick-report density for Mai 2021. <strong>Deadline is Friday, 1. September at 13:00</strong>.</p>
-<p>The method with which we determin the winner is explanied below.</p>
-<!---
- todo: include crosslink 
---->
+<p><strong>YOUR TASK</strong> (<em>should you choose to accept it</em>) is to create a raster dataset with a 100 m resolution in the coordinate system <a href="https://epsg.io/2056"><code>EPSG:2056</code></a> with the extent as provided in the raster mask (see below). The cell values should range from 0 to 100 (0 to 1 uses more disk space<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>) and describe the normalized tick-report occurance for Mai 2021 with values for ALL land mask pixels. <strong>Deadline is Friday, 1. September at 13:00</strong>. You can use tick occurrences + any possible covariates for previous years and NO training data for 2021. You should consider modeling tick presence as function of dynamic climate but simple spatial-only models can also be used.</p>
 <p>To get you started, we have prepared some spatial covariates (see <a href="#sec-predictors">Section&nbsp;6</a>). However, feel free to use your own.</p>
 <p>Steps needed to participate:</p>
 <ol type="1">
@@ -332,30 +328,26 @@ Reproducibility
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># download from https://www.swisstopo.admin.ch/de/geodata/landscape/tlmregio.html</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/swissTLM/swisstlmregio_2022_2056.gdb.zip"</span>, <span class="at">exdir =</span> <span class="st">"./data/raw/swissTLM/"</span>)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>switzerland <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"./data/raw/swissTLM/swissTLMRegio_BOUNDARIES_LV95.gdb"</span>, <span class="st">"TLMRegio_LANDESGEBIET"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># filter(NAME != "Liechtenstein") |&gt;</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>switzerland <span class="ot">&lt;-</span> switzerland <span class="sc">|&gt;</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(NAME <span class="sc">==</span> <span class="st">"Schweiz#Suisse#Svizzera#Svizra"</span> <span class="sc">|</span> Shape_Area <span class="sc">&lt;</span> <span class="fl">10e6</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_union</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_transform</span>(<span class="dv">2056</span>) <span class="sc">|&gt;</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_zm</span>() <span class="sc">|&gt;</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_as_sf</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>switzerland <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/raw/swissTLM/swissBOUNDARIES3D_1_4_LV95_LN02.gdb"</span>, <span class="st">"TLM_LANDESGEBIET"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(NAME <span class="sc">!=</span> <span class="st">"Liechtenstein"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">2056</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"./data/raw/swissTLM/swissTLMRegio_Produkt_LV95.gdb"</span>, <span class="st">"TLMRegio_Lake"</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> tlm_region_lake[switzerland,,]</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"./data/raw/swissTLM/swissTLMRegio_Produkt_LV95.gdb"</span>, <span class="st">"TLMRegio_Lake"</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> tlm_region_lake[switzerland,,]</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> tlm_region_lake <span class="sc">|&gt;</span></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(SHAPE_Area, <span class="at">n =</span> <span class="dv">7</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> tlm_region_lake <span class="sc">|&gt;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(SHAPE_Area, <span class="at">n =</span> <span class="dv">7</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>mask_template <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="at">crs =</span> <span class="st">"epsg:2056"</span>, <span class="at">resolution =</span> <span class="dv">100</span>, <span class="at">xmin =</span> <span class="dv">2485000</span>, <span class="at">xmax =</span> <span class="dv">2834000</span>, <span class="at">ymin =</span> <span class="dv">1075000</span>, <span class="at">ymax =</span> <span class="dv">1296000</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rasterize</span>(switzerland, mask_template)</span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>mask_template <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="at">crs =</span> <span class="st">"epsg:2056"</span>, <span class="at">resolution =</span> <span class="dv">100</span>, <span class="at">xmin =</span> <span class="dv">2485000</span>, <span class="at">xmax =</span> <span class="dv">2834000</span>, <span class="at">ymin =</span> <span class="dv">1075000</span>, <span class="at">ymax =</span> <span class="dv">1296000</span>)</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> <span class="fu">mask</span>(switzerland_mask, tlm_region_lake,<span class="at">inverse =</span> <span class="cn">TRUE</span>) </span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rasterize</span>(switzerland, mask_template)</span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> <span class="fu">mask</span>(switzerland_mask, tlm_region_lake,<span class="at">inverse =</span> <span class="cn">TRUE</span>) </span>
-<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(switzerland_mask, <span class="st">"./data/prepared/Mask/Mask.tif"</span>, <span class="at">datatype =</span> <span class="st">"INT1U"</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(switzerland_mask, <span class="st">"./data/prepared/Mask/Mask.tif"</span>, <span class="at">datatype =</span> <span class="st">"INT1U"</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Imagine you did your machine-learning magic and created an object named <code>density_predicted</code>.</p>
@@ -395,29 +387,17 @@ min value   :                 0
 max value   :               100 </code></pre>
 </div>
 </div>
-<p>Now, export your prediction to a Geotiff with the datatype <code>INT1U</code> and send it to Nils via Mail.</p>
+<p>Now, export your prediction to a Geotiff with the datatype <code>INT1U</code> and a compression (<code>gdal=c("COMPRESS=DEFLATE")</code>) and send it to Nils via Mail.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(density_predicted, <span class="st">"./data/raw/Tick_Reports/density_predicted.tif"</span>, <span class="at">datatype =</span> <span class="st">"INT1U"</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(density_predicted, <span class="st">"./data/raw/Tick_Reports/density_predicted.tif"</span>, <span class="at">datatype =</span> <span class="st">"INT1U"</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>, <span class="at">gdal=</span><span class="fu">c</span>(<span class="st">"COMPRESS=DEFLATE"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The winner is determined by comparing your predictions with the kernel density estimations that we calculated from the reports in Mai 2021. Let’s illustrate this:</p>
 <div class="cell">
-<div class="cell-output cell-output-stdout">
-<pre><code>Reading layer `tick_reports_test' from data source 
-  `/home/nils/ownCloud/Projekte/2023_Zecken_OpenGeoHub/gh-repos/data-challenge/data/raw/Tick_Reports/tick_reports_TEST.gpkg' 
-  using driver `GPKG'
-Simple feature collection with 1343 features and 5 fields
-Geometry type: POINT
-Dimension:     XY
-Bounding box:  xmin: 2487346 ymin: 1077218 xmax: 2775467 ymax: 1289962
-Projected CRS: CH1903+ / LV95</code></pre>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>density_true <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/raw/Tick_Reports/density_true.tif"</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/raw/Tick_Reports/density_predicted.tif"</span>)</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Function </span><span class="al">TBD</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>density_true <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/raw/Tick_Reports/density_true.tif"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/raw/Tick_Reports/density_predicted.tif"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># some function</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!---
  sqrt(global((density_true-density_predicted)^2, mean, na.rm = TRUE)[1,]) 
@@ -526,26 +506,26 @@ Projected CRS: CH1903+ / LV95</code></pre>
 <div class="cell">
 <details>
 <summary>Code on how we prepared the population density data (irrelavant to you)</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>population_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/raw/Population/"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span>(population_zips, \(x){</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    csv <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"STATPOP"</span>,<span class="fu">str_sub</span>(<span class="fu">basename</span>(x), <span class="dv">14</span>, <span class="dv">17</span>),<span class="st">".csv"</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    file_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    csv_path <span class="ot">&lt;-</span> file_names[<span class="fu">str_detect</span>(file_names, csv)]</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> csv_path, <span class="at">exdir =</span> <span class="st">"data/prepared/Population"</span>, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>population_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/raw/Population/"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span>(population_zips, \(x){</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    csv <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"STATPOP"</span>,<span class="fu">str_sub</span>(<span class="fu">basename</span>(x), <span class="dv">14</span>, <span class="dv">17</span>),<span class="st">".csv"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    file_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    csv_path <span class="ot">&lt;-</span> file_names[<span class="fu">str_detect</span>(file_names, csv)]</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> csv_path, <span class="at">exdir =</span> <span class="st">"data/prepared/Population"</span>, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here is how you can now import these raster datasets</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/prepared/Population/"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(x){</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">read_delim</span>(x, <span class="at">col_select =</span> <span class="fu">c</span>(E_KOORD, N_KOORD, <span class="fu">matches</span>(<span class="st">"B</span><span class="sc">\\</span><span class="st">d{2}BTOT"</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rast</span>()</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">|&gt;</span></span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rast</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here is how you can now import these raster datasets</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/prepared/Population/"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(x){</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">read_delim</span>(x, <span class="at">col_select =</span> <span class="fu">c</span>(E_KOORD, N_KOORD, <span class="fu">matches</span>(<span class="st">"B</span><span class="sc">\\</span><span class="st">d{2}BTOT"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rast</span>()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rast</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="modelling-hazard" class="level3">
@@ -569,34 +549,34 @@ Projected CRS: CH1903+ / LV95</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">54</td>
-<td style="text-align: left;">Forest Damage</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: left;">Scree, Sand</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">57</td>
-<td style="text-align: left;">Shrub Forest</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: left;">Extraction Sites</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">26</td>
-<td style="text-align: left;">Other Supply and Disposal Facilities</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: left;">Construction and Settlement Brownfields</td>
 <td style="text-align: right;">1</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">42</td>
-<td style="text-align: left;">Natural Meadows</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">Row Houses and Terraced Houses</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">58</td>
-<td style="text-align: left;">Hedgerows, Hedges</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: left;">Glaciers, Firn</td>
+<td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">52</td>
-<td style="text-align: left;">Afforestation</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: left;">Sheep Pastures</td>
+<td style="text-align: right;">2</td>
 </tr>
 </tbody>
 </table>
@@ -607,16 +587,16 @@ Projected CRS: CH1903+ / LV95</code></pre>
 <div class="cell">
 <details>
 <summary>data preperation</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>arealstat_path <span class="ot">&lt;-</span> <span class="st">"./data/raw/Arealstatistik/ag-b-00.03-37-area-csv.csv"</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># important are the columns: E_COORD N_COORD AS18_72</span></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># (x / y coordinates in EPSG 2056 and landuse in 72 cateogories for the years 2013 - 2018</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># see be-b-00.03-37-area-var-v01.xlsx in ag-b-00.03-37-area-csv-APPENDIX.zip</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>areal <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(arealstat_path, <span class="st">";"</span>, <span class="at">col_select =</span> <span class="fu">c</span>(E_COORD, N_COORD, AS18_72))</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>arealstat_noas04 <span class="ot">&lt;-</span> <span class="fu">rast</span>(areal, <span class="at">crs =</span> <span class="st">"epsg:2056"</span>)</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(arealstat_noas04, <span class="st">"./data/prepared/Arealstatistik/AS18_72.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>arealstat_path <span class="ot">&lt;-</span> <span class="st">"./data/raw/Arealstatistik/ag-b-00.03-37-area-csv.csv"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># important are the columns: E_COORD N_COORD AS18_72</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># (x / y coordinates in EPSG 2056 and landuse in 72 cateogories for the years 2013 - 2018</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># see be-b-00.03-37-area-var-v01.xlsx in ag-b-00.03-37-area-csv-APPENDIX.zip</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>areal <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(arealstat_path, <span class="st">";"</span>, <span class="at">col_select =</span> <span class="fu">c</span>(E_COORD, N_COORD, AS18_72))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>arealstat_noas04 <span class="ot">&lt;-</span> <span class="fu">rast</span>(areal, <span class="at">crs =</span> <span class="st">"epsg:2056"</span>)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(arealstat_noas04, <span class="st">"./data/prepared/Arealstatistik/AS18_72.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p><strong>CORINE Landcover</strong></p>
@@ -651,14 +631,14 @@ Projected CRS: CH1903+ / LV95</code></pre>
 <div class="cell">
 <details>
 <summary>data preperation</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dhm_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/DHM/"</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"data/raw/DHM/DHM25_MM_ASCII_GRID.zip"</span>, <span class="at">exdir =</span> dhm_path)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/dhm25_grid_raster.asc"</span>))</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(dhm25, <span class="fu">file.path</span>(dhm_path, <span class="st">"DHM25.tif"</span>))</span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(<span class="fu">list.files</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/"</span>),<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dhm_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/DHM/"</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"data/raw/DHM/DHM25_MM_ASCII_GRID.zip"</span>, <span class="at">exdir =</span> dhm_path)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/dhm25_grid_raster.asc"</span>))</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(dhm25, <span class="fu">file.path</span>(dhm_path, <span class="st">"DHM25.tif"</span>))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(<span class="fu">list.files</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/"</span>),<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -745,31 +725,37 @@ Projected CRS: CH1903+ / LV95</code></pre>
 <div class="cell">
 <details>
 <summary>Data preperation</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>files_monthly <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RhiresM_61_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"SrelM_71_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"TabsM_61_21_ch01r.swiss.lv95.zip"</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>weather_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/Weather"</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/Wetter/Klimadaten_Feb22.zip"</span>, <span class="at">files =</span> <span class="fu">file.path</span>(<span class="st">"Klimadaten_Feb22"</span>, files_monthly), <span class="at">exdir =</span> weather_path, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>weather_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(weather_path, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(weather_zips, \(x){</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># browser()</span></span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    nc_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_names[<span class="fu">as.integer</span>(<span class="fu">str_match</span>(nc_names, <span class="st">"(</span><span class="sc">\\</span><span class="st">d{4})</span><span class="sc">\\</span><span class="st">d{8}"</span>)[,<span class="dv">2</span>]) <span class="sc">&gt;=</span> <span class="dv">2015</span>]</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_select[<span class="sc">!</span><span class="fu">is.na</span>(nc_select)]</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    exdir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(weather_path, <span class="fu">str_match</span>(<span class="fu">basename</span>(x), <span class="st">"([a-zA-Z]+)"</span>)[,<span class="dv">2</span>])</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> nc_select, <span class="at">exdir =</span> exdir, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(weather_zips)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>files_monthly <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RhiresM_61_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"SrelM_71_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"TabsM_61_21_ch01r.swiss.lv95.zip"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>weather_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/Weather"</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/Wetter/Klimadaten_Feb22.zip"</span>, <span class="at">files =</span> <span class="fu">file.path</span>(<span class="st">"Klimadaten_Feb22"</span>, files_monthly), <span class="at">exdir =</span> weather_path, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>weather_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(weather_path, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(weather_zips, \(x){</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># browser()</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    nc_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_names[<span class="fu">as.integer</span>(<span class="fu">str_match</span>(nc_names, <span class="st">"(</span><span class="sc">\\</span><span class="st">d{4})</span><span class="sc">\\</span><span class="st">d{8}"</span>)[,<span class="dv">2</span>]) <span class="sc">&gt;=</span> <span class="dv">2015</span>]</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_select[<span class="sc">!</span><span class="fu">is.na</span>(nc_select)]</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    exdir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(weather_path, <span class="fu">str_match</span>(<span class="fu">basename</span>(x), <span class="st">"([a-zA-Z]+)"</span>)[,<span class="dv">2</span>])</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> nc_select, <span class="at">exdir =</span> exdir, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(weather_zips)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
+</section>
+<section id="other-data-sources" class="level4">
+<h4 class="anchored" data-anchor-id="other-data-sources">Other data sources:</h4>
+<ul>
+<li>pan-EU climatic variables available at: https://github.com/OpenGeoHub/spatial-prediction-eml/blob/master/input/mood_layers1km.csv (especially annual human density, night lights, NDVI etc)</li>
+</ul>
 </section>
 </section>
 </section>
