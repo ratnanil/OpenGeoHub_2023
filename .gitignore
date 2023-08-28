@@ -6,5 +6,5 @@ index.qmd
 *
 !.gitignore
 !index.html
-!index_files
-!images
+!index_files/*
+!images/*

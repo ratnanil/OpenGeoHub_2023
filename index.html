@@ -131,6 +131,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
 <p>The tick prevention app “tick” for <a href="https://apps.apple.com/ch/app/zecke/id946829736">iOS</a> and <a href="https://play.google.com/store/apps/details?id=com.garzotto.zecke">android</a> is a mobile application that provides information on tick prevention and tick bite risk. The user is able to enter tick bites in a diary and is reminded to check for possible disease symptoms. Additionally, the user can enter the location of where the tick bite took place on a map, thus helping to identify tick hotspots. More information can be found <a href="https://www.zhaw.ch/en/lsfm/business-services/natural-resource-sciences/ticks/tick-app/?mdrv=www.zhaw.ch&amp;cHash=a51a3a438004a34df53e9a544e4b070b">here</a>.</p>
 <p>In this manner, over 50k tick bites were collected over a period of several years. This data can be used to identify tick hotspots and to predict tick bite risk based on environmental factors. We have a list of variables that experts think are important for predicting tick bite risk. We want to use machine learning to find out which variables are actually important and to predict tick bite risk for a given location. The goal is to create a model which outperforms <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bag.zeckenstichmodell&amp;E=2673880.30&amp;N=1214206.44&amp;zoom=8&amp;layers_opacity=0.75">the existing expert-based model</a>.</p>
+<p>You can download the whole dummy dataset <a href="https://filesender.switch.ch/filesender2/?s=download&amp;token=ba50d7d8-f59c-4f38-9204-aef2afb6733e">here</a>. Password is provided in the Mattermost channel. The real datset will be provided after signing the NDA.</p>
 <div class="cell">
 <details>
 <summary>Libraries used to create this report</summary>
@@ -150,7 +151,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="task-definition" class="level2">
 <h2 class="anchored" data-anchor-id="task-definition">Task definition</h2>
-<p><strong>YOUR TASK</strong> (<em>should you choose to accept it</em>) is to create a raster dataset with a 100 m resolution in the coordinate system <a href="https://epsg.io/2056"><code>EPSG:2056</code></a> with the extent as provided in the raster mask (see below). The cell values should range from 0 to 100 (0 to 1 uses more disk space<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>) and describe the normalized tick-report density <strong>for Mai 2021</strong>.</p>
+<p><strong>YOUR TASK</strong> (<em>should you choose to accept it</em>) is to create a raster dataset with a 100 m resolution in the coordinate system <a href="https://epsg.io/2056"><code>EPSG:2056</code></a> with the extent as provided in the raster mask (see below). The cell values should range from 0 to 100 (0 to 1 uses more disk space<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>) and describe the normalized tick-report density for Mai 2021. <strong>Deadline is Friday, 1. September at 13:00</strong>.</p>
 <p>The method with which we determin the winner is explanied below.</p>
 <!---
  todo: include crosslink 
@@ -302,7 +303,7 @@ Reproducibility
 <span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>tick_reports_sf<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
 <span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>tick_traning <span class="ot">&lt;-</span> tick_reports_sf <span class="sc">|&gt;</span></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>tick_training <span class="ot">&lt;-</span> tick_reports_sf <span class="sc">|&gt;</span></span>
 <span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">year</span>(datetime) <span class="sc">&lt;</span> <span class="dv">2021</span>)</span>
 <span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tick_traning<span class="sc">$</span>datetime)</span>
@@ -313,10 +314,16 @@ Reproducibility
 <span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tick_test<span class="sc">$</span>datetime)</span>
 <span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(tick_traning, <span class="st">"./data/prepared/Tick_Reports/tick_reports_training.gpkg"</span>, <span class="st">"tick_reports_training"</span>, <span class="at">append =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure to never export the </span><span class="al">TEST</span><span class="co"> data into the "prepared"-folder, otherwise this is shared with the students.</span></span>
-<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(tick_test, <span class="st">"data/raw/Tick_Reports/tick_reports_TEST.gpkg"</span>, <span class="st">"tick_reports_test"</span>, <span class="at">append =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-131"><a href="#cb2-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-132"><a href="#cb2-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-133"><a href="#cb2-133" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(tick_training, <span class="st">"./data/prepared/Tick_Reports/tick_reports_training.gpkg"</span>, <span class="st">"tick_reports_training"</span>, <span class="at">append =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-134"><a href="#cb2-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-135"><a href="#cb2-135" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure to never export the </span><span class="al">TEST</span><span class="co"> data into the "prepared"-folder, otherwise this is shared with the students.</span></span>
+<span id="cb2-136"><a href="#cb2-136" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(tick_test, <span class="st">"data/raw/Tick_Reports/tick_reports_TEST.gpkg"</span>, <span class="st">"tick_reports_test"</span>, <span class="at">append =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -562,34 +569,34 @@ Projected CRS: CH1903+ / LV95</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">47</td>
-<td style="text-align: left;">Overgrown Alpine and Jura Pastures</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: left;">Forest Damage</td>
+<td style="text-align: right;">3</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">51</td>
-<td style="text-align: left;">Narrow Forest</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: left;">Shrub Forest</td>
 <td style="text-align: right;">4</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">56</td>
-<td style="text-align: left;">Dissolved Forest (on Unproductive Land)</td>
-<td style="text-align: right;">4</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">37</td>
-<td style="text-align: left;">Orchards</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: left;">Other Supply and Disposal Facilities</td>
 <td style="text-align: right;">1</td>
 </tr>
+<tr class="even">
+<td style="text-align: right;">42</td>
+<td style="text-align: left;">Natural Meadows</td>
+<td style="text-align: right;">2</td>
+</tr>
 <tr class="odd">
-<td style="text-align: right;">29</td>
-<td style="text-align: left;">Construction Sites</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: left;">Hedgerows, Hedges</td>
+<td style="text-align: right;">4</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">15</td>
-<td style="text-align: left;">Highways</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: left;">Afforestation</td>
+<td style="text-align: right;">3</td>
 </tr>
 </tbody>
 </table>
