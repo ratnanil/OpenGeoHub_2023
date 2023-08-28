@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.361">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>OpenGeoHub 2023 Data Challenge</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#abstract" id="toc-abstract" class="nav-link active" data-scroll-target="#abstract">Abstract</a></li>
+  <li><a href="#task-definition" id="toc-task-definition" class="nav-link" data-scroll-target="#task-definition">Task definition</a></li>
+  <li><a href="#submission-walkthrough" id="toc-submission-walkthrough" class="nav-link" data-scroll-target="#submission-walkthrough">Submission Walkthrough</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a></li>
+  <li><a href="#dependent-variable-tick-data" id="toc-dependent-variable-tick-data" class="nav-link" data-scroll-target="#dependent-variable-tick-data">Dependent variable: Tick data</a>
+  <ul class="collapse">
+  <li><a href="#temporal-dimension" id="toc-temporal-dimension" class="nav-link" data-scroll-target="#temporal-dimension">Temporal dimension</a></li>
+  <li><a href="#spatial-accuracy" id="toc-spatial-accuracy" class="nav-link" data-scroll-target="#spatial-accuracy">Spatial accuracy</a></li>
+  </ul></li>
+  <li><a href="#sec-predictors" id="toc-sec-predictors" class="nav-link" data-scroll-target="#sec-predictors">Covariates / Geodata</a>
+  <ul class="collapse">
+  <li><a href="#modelling-exposure" id="toc-modelling-exposure" class="nav-link" data-scroll-target="#modelling-exposure">Modelling Exposure</a></li>
+  <li><a href="#modelling-hazard" id="toc-modelling-hazard" class="nav-link" data-scroll-target="#modelling-hazard">Modelling Hazard</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">OpenGeoHub 2023 Data Challenge</h1>
+<p class="subtitle lead">Predicting Tick Bite Risk based on 30k tick reports</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+<style type="text/css">
+.todo{
+    color: red
+}
+</style>
+</div>
+<section id="abstract" class="level2">
+<h2 class="anchored" data-anchor-id="abstract">Abstract</h2>
+<p>The tick prevention app “tick” for <a href="https://apps.apple.com/ch/app/zecke/id946829736">iOS</a> and <a href="https://play.google.com/store/apps/details?id=com.garzotto.zecke">android</a> is a mobile application that provides information on tick prevention and tick bite risk. The user is able to enter tick bites in a diary and is reminded to check for possible disease symptoms. Additionally, the user can enter the location of where the tick bite took place on a map, thus helping to identify tick hotspots. More information can be found <a href="https://www.zhaw.ch/en/lsfm/business-services/natural-resource-sciences/ticks/tick-app/?mdrv=www.zhaw.ch&amp;cHash=a51a3a438004a34df53e9a544e4b070b">here</a>.</p>
+<p>In this manner, over 50k tick bites were collected over a period of several years. This data can be used to identify tick hotspots and to predict tick bite risk based on environmental factors. We have a list of variables that experts think are important for predicting tick bite risk. We want to use machine learning to find out which variables are actually important and to predict tick bite risk for a given location. The goal is to create a model which outperforms <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bag.zeckenstichmodell&amp;E=2673880.30&amp;N=1214206.44&amp;zoom=8&amp;layers_opacity=0.75">the existing expert-based model</a>.</p>
+<div class="cell">
+<details>
+<summary>Libraries used to create this report</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"dplyr"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"sf"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"readr"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"ggplot2"</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"plotly"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"purrr"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"janitor"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"lubridate"</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(<span class="st">"terra"</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="st">"sf_max.plot"</span> <span class="ot">=</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="task-definition" class="level2">
+<h2 class="anchored" data-anchor-id="task-definition">Task definition</h2>
+<p><strong>YOUR TASK</strong> (<em>should you choose to accept it</em>) is to create a raster dataset with a 100 m resolution in the coordinate system <a href="https://epsg.io/2056"><code>EPSG:2056</code></a> with the extent as provided in the raster mask (see below). The cell values should range from 0 to 100 (0 to 1 uses more disk space<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>) and describe the normalized tick-report density <strong>for Mai 2021</strong>.</p>
+<p>The method with which we determin the winner is explanied below.</p>
+<!---
+ todo: include crosslink 
+--->
+<p>To get you started, we have prepared some spatial covariates (see <a href="#sec-predictors">Section&nbsp;6</a>). However, feel free to use your own.</p>
+<p>Steps needed to participate:</p>
+<ol type="1">
+<li>On mattermost, write in the hackathon chat that you are interested in joining the tick data challenge. We will send you an NDA to sign and return to us .(the tick data and some of the prepared covariates are confidential)</li>
+<li>After returning the NDA, you will be provided with the tick data and the prepared covariates. Depending on our internet connection, we will provide you the data with a download link or a usb drive.</li>
+<li>Use covariates to predict the tick density in Mai 2021, using the programming language of your choice. Generate a html or pdf report from your workflow, details see below. Make sure your output raster has the correct dimensions (details see below). <!-- todo: include crosslink --></li>
+<li>Make a Zip File of your scripts, the report and your final raster output (not the inputs!) and send the zip-File to Nils via Mail</li>
+</ol>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Reproducibility
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Please make your script as reproducible as possible. For example, you should be very explicit about where you get your input data from. Additionally, please use literate programming methods to document your work.</p>
+<ul>
+<li><strong>R users</strong>: You can use RMarkdown, Quarto or JupyterNotebook and generate a html/pdf report. If you prefer to work with <code>*.R</code>-Scripts, you can use <code>rmarkdown::render("your-r-script.R", "html_document")</code> to convert your R Script to a html or pdf report.</li>
+<li><strong>Python users</strong>: You can use Quarto or JupyterNotebook and generate a html/pdf report. If you prefer to work with <code>*.py</code>-Scripts, you can use <a href="https://jupytext.readthedocs.io/">jupytext</a> to create a html/pdf report.</li>
+<li><strong>Julia users</strong>: You can use Quarto or JupyterNotebooks and generate a html/pdf report. If you prefer to work with <code>*.jl</code> files, you can ask us how to turn this into a html/pdf report.</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="submission-walkthrough" class="level2">
+<h2 class="anchored" data-anchor-id="submission-walkthrough">Submission Walkthrough</h2>
+<div class="cell">
+<details>
+<summary>Code to prepare the tick-report data (not relevant to you)</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/raw/Tick_Reports/tick-reports.csv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># clean column names and format columns</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(id, x, y, acc, body_part, report_type, age, gender, host, pickup, deleted), <span class="sc">~</span> <span class="fu">as.integer</span>(.x))) <span class="sc">|&gt;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">c</span>(lat, lon, date_acc), <span class="sc">~</span> <span class="fu">as.numeric</span>(.x))) <span class="sc">|&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">datetime =</span> <span class="fu">as.POSIXct</span>(date, <span class="at">format =</span> <span class="st">"%Y-%m-%d %H:%M:%S"</span>, <span class="at">tz =</span> <span class="st">"CET"</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">date =</span> <span class="fu">as.Date</span>(datetime)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># remove rows without a data or data is older than 2015</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">|&gt;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(date)) <span class="sc">|&gt;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date <span class="sc">&gt;</span> <span class="st">"2015-01-01"</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># remove reports outside a oversized bounding box</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>XMIN_21781 <span class="ot">&lt;-</span> <span class="dv">485000</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>XMAX_21781 <span class="ot">&lt;-</span> <span class="dv">834000</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>YMAX_21781 <span class="ot">&lt;-</span> <span class="dv">296000</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>YMIN_21781 <span class="ot">&lt;-</span> <span class="dv">075000</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">%&gt;%</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(x <span class="sc">&lt;</span> XMAX_21781, x <span class="sc">&gt;</span> XMIN_21781) <span class="sc">%&gt;%</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(y <span class="sc">&lt;</span> YMAX_21781, y <span class="sc">&gt;</span> YMIN_21781)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co"># remove reports without a uuid or reports that are marked as deleted</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">%&gt;%</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(uuid <span class="sc">!=</span> <span class="st">""</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(deleted <span class="sc">!=</span> <span class="dv">1</span>)</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="co"># till now, all steps are relatively straightforward. Now, opinions start to</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="co"># matter.</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="co"># remove reports with a spatial accuracy of more than 1 km radius</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">|&gt;</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(acc <span class="sc">&lt;</span> <span class="dv">1000</span>)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="co"># this step is not necessary anymore, I'll keep it here to document</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="co"># default acc values. There are more default values it seems, as can be seen</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="co"># when visualizing the data as a histogram</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">%&gt;%</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(acc <span class="sc">%in%</span> <span class="fu">c</span>(57274L, 64434L, 1014L)))</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>tick_reports_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(tick_reports, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"lon"</span>, <span class="st">"lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a><span class="co"># I dont know who came up with this, but it doesn't seem to be the case that there</span></span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a><span class="co"># are more locations near the default locations than outside</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>default_locations <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">lat =</span> <span class="fu">c</span>(<span class="fl">47.3647</span>, <span class="fl">46.81</span>), <span class="at">lon =</span> <span class="fu">c</span>(<span class="fl">8.5534</span>, <span class="fl">8.23</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_as_sf</span>(<span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"lon"</span>, <span class="st">"lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>)</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>is_default <span class="ot">&lt;-</span> <span class="fu">st_is_within_distance</span>(tick_reports_sf, default_locations, <span class="dv">1000</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map_lgl</span>(\(x)<span class="fu">length</span>(x) <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(is_default)</span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="co"># date accuracy only has two values: 43'200 and 432'000 (0.5 and 5 days?)</span></span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a><span class="co"># There are only 8k reports for the higher value, we can discard these</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(tick_reports<span class="sc">$</span>date_acc)</span>
+<span id="cb2-66"><a href="#cb2-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-67"><a href="#cb2-67" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">|&gt;</span></span>
+<span id="cb2-68"><a href="#cb2-68" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(date_acc <span class="sc">&lt;</span> <span class="dv">50000</span>)</span>
+<span id="cb2-69"><a href="#cb2-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-70"><a href="#cb2-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-71"><a href="#cb2-71" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>date_acc <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-72"><a href="#cb2-72" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>body_part <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-73"><a href="#cb2-73" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>report_type <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-74"><a href="#cb2-74" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>age <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-75"><a href="#cb2-75" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>gender <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-76"><a href="#cb2-76" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>host <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-77"><a href="#cb2-77" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>pickup <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-78"><a href="#cb2-78" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>uuid <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-79"><a href="#cb2-79" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>comment <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-80"><a href="#cb2-80" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>deleted <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-81"><a href="#cb2-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-82"><a href="#cb2-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-83"><a href="#cb2-83" aria-hidden="true" tabindex="-1"></a><span class="co"># some reports are obivously duplicates: same x and y and date (time may vary slighly)</span></span>
+<span id="cb2-84"><a href="#cb2-84" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="sc">|&gt;</span></span>
+<span id="cb2-85"><a href="#cb2-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(x, y, date) <span class="sc">|&gt;</span></span>
+<span id="cb2-86"><a href="#cb2-86" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">n</span>() <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-87"><a href="#cb2-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id, datetime)</span>
+<span id="cb2-88"><a href="#cb2-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-89"><a href="#cb2-89" aria-hidden="true" tabindex="-1"></a><span class="co"># keep only distinct reports</span></span>
+<span id="cb2-90"><a href="#cb2-90" aria-hidden="true" tabindex="-1"></a>tick_reports <span class="ot">&lt;-</span> tick_reports <span class="sc">|&gt;</span></span>
+<span id="cb2-91"><a href="#cb2-91" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(x, y, date, <span class="at">.keep_all =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-92"><a href="#cb2-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-93"><a href="#cb2-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-94"><a href="#cb2-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-95"><a href="#cb2-95" aria-hidden="true" tabindex="-1"></a><span class="co"># I think the lon / lat coorindates are more accurate.</span></span>
+<span id="cb2-96"><a href="#cb2-96" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>x <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-97"><a href="#cb2-97" aria-hidden="true" tabindex="-1"></a>tick_reports<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-98"><a href="#cb2-98" aria-hidden="true" tabindex="-1"></a>tick_reports_sf <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(tick_reports, <span class="at">coords =</span> <span class="fu">c</span>(<span class="st">"lon"</span>, <span class="st">"lat"</span>), <span class="at">crs =</span> <span class="dv">4326</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-99"><a href="#cb2-99" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">2056</span>)</span>
+<span id="cb2-100"><a href="#cb2-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-101"><a href="#cb2-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-102"><a href="#cb2-102" aria-hidden="true" tabindex="-1"></a>tick_reports_sf <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(tick_reports_sf, <span class="fu">st_coordinates</span>(tick_reports_sf))</span>
+<span id="cb2-103"><a href="#cb2-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-104"><a href="#cb2-104" aria-hidden="true" tabindex="-1"></a>switzerland <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/raw/swissTLM/swissBOUNDARIES3D_1_4_LV95_LN02.gdb"</span>, <span class="st">"TLM_LANDESGEBIET"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-105"><a href="#cb2-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-106"><a href="#cb2-106" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(NAME <span class="sc">!=</span> <span class="st">"Liechtenstein"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-107"><a href="#cb2-107" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_union</span>() <span class="sc">|&gt;</span></span>
+<span id="cb2-108"><a href="#cb2-108" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="dv">2056</span>)</span>
+<span id="cb2-109"><a href="#cb2-109" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-110"><a href="#cb2-110" aria-hidden="true" tabindex="-1"></a>tick_reports_sf <span class="ot">&lt;-</span> tick_reports_sf[switzerland, , ]</span>
+<span id="cb2-111"><a href="#cb2-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-112"><a href="#cb2-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-113"><a href="#cb2-113" aria-hidden="true" tabindex="-1"></a>tick_reports_sf<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="cn">NULL</span></span>
+<span id="cb2-114"><a href="#cb2-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-115"><a href="#cb2-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-116"><a href="#cb2-116" aria-hidden="true" tabindex="-1"></a>tick_traning <span class="ot">&lt;-</span> tick_reports_sf <span class="sc">|&gt;</span></span>
+<span id="cb2-117"><a href="#cb2-117" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">year</span>(datetime) <span class="sc">&lt;</span> <span class="dv">2021</span>)</span>
+<span id="cb2-118"><a href="#cb2-118" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-119"><a href="#cb2-119" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tick_traning<span class="sc">$</span>datetime)</span>
+<span id="cb2-120"><a href="#cb2-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-121"><a href="#cb2-121" aria-hidden="true" tabindex="-1"></a>tick_test <span class="ot">&lt;-</span> tick_reports_sf <span class="sc">|&gt;</span></span>
+<span id="cb2-122"><a href="#cb2-122" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="fu">year</span>(datetime) <span class="sc">==</span> <span class="dv">2021</span>, <span class="fu">month</span>(datetime) <span class="sc">==</span> <span class="dv">5</span>)</span>
+<span id="cb2-123"><a href="#cb2-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-124"><a href="#cb2-124" aria-hidden="true" tabindex="-1"></a><span class="fu">range</span>(tick_test<span class="sc">$</span>datetime)</span>
+<span id="cb2-125"><a href="#cb2-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-126"><a href="#cb2-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-127"><a href="#cb2-127" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(tick_traning, <span class="st">"./data/prepared/Tick_Reports/tick_reports_training.gpkg"</span>, <span class="st">"tick_reports_training"</span>, <span class="at">append =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb2-128"><a href="#cb2-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-129"><a href="#cb2-129" aria-hidden="true" tabindex="-1"></a><span class="co"># make sure to never export the </span><span class="al">TEST</span><span class="co"> data into the "prepared"-folder, otherwise this is shared with the students.</span></span>
+<span id="cb2-130"><a href="#cb2-130" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(tick_test, <span class="st">"data/raw/Tick_Reports/tick_reports_TEST.gpkg"</span>, <span class="st">"tick_reports_test"</span>, <span class="at">append =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code on how we generated the mask (not relevant for you)</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># download from https://www.swisstopo.admin.ch/de/geodata/landscape/tlmregio.html</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/swissTLM/swisstlmregio_2022_2056.gdb.zip"</span>, <span class="at">exdir =</span> <span class="st">"./data/raw/swissTLM/"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>switzerland <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"./data/raw/swissTLM/swissTLMRegio_BOUNDARIES_LV95.gdb"</span>, <span class="st">"TLMRegio_LANDESGEBIET"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># filter(NAME != "Liechtenstein") |&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>switzerland <span class="ot">&lt;-</span> switzerland <span class="sc">|&gt;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">filter</span>(NAME <span class="sc">==</span> <span class="st">"Schweiz#Suisse#Svizzera#Svizra"</span> <span class="sc">|</span> Shape_Area <span class="sc">&lt;</span> <span class="fl">10e6</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_union</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_transform</span>(<span class="dv">2056</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_zm</span>() <span class="sc">|&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">st_as_sf</span>()</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"./data/raw/swissTLM/swissTLMRegio_Produkt_LV95.gdb"</span>, <span class="st">"TLMRegio_Lake"</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> tlm_region_lake[switzerland,,]</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>tlm_region_lake <span class="ot">&lt;-</span> tlm_region_lake <span class="sc">|&gt;</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(SHAPE_Area, <span class="at">n =</span> <span class="dv">7</span>)</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>mask_template <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="at">crs =</span> <span class="st">"epsg:2056"</span>, <span class="at">resolution =</span> <span class="dv">100</span>, <span class="at">xmin =</span> <span class="dv">2485000</span>, <span class="at">xmax =</span> <span class="dv">2834000</span>, <span class="at">ymin =</span> <span class="dv">1075000</span>, <span class="at">ymax =</span> <span class="dv">1296000</span>)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> terra<span class="sc">::</span><span class="fu">rasterize</span>(switzerland, mask_template)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> <span class="fu">mask</span>(switzerland_mask, tlm_region_lake,<span class="at">inverse =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(switzerland_mask, <span class="st">"./data/prepared/Mask/Mask.tif"</span>, <span class="at">datatype =</span> <span class="st">"INT1U"</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Imagine you did your machine-learning magic and created an object named <code>density_predicted</code>.</p>
+<p>To compare <code>density_predicted</code> to <code>density_true</code>, the need to have the same extent and resolution. You can use the dataset (<code>Mask/Mask.tif</code>) to ensure this.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/prepared/Mask/Mask.tif"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 1: Resample</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">resample</span>(density_predicted, switzerland_mask)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Crop</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">crop</span>(density_predicted, switzerland_mask)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Mask</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">mask</span>(density_predicted, switzerland_mask)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Next, normalize it to values between 0 and 100, for example with the min-max values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>raster_normalize <span class="ot">&lt;-</span> <span class="cf">function</span>(input, <span class="at">factor =</span> <span class="dv">1</span>){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    raster_range <span class="ot">&lt;-</span> <span class="fu">minmax</span>(input)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    (input <span class="sc">-</span> raster_range[<span class="dv">1</span>])<span class="sc">/</span>(raster_range[<span class="dv">2</span>] <span class="sc">-</span> raster_range[<span class="dv">1</span>])<span class="sc">*</span>factor</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">raster_normalize</span>(density_predicted, <span class="dv">100</span>)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>density_predicted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>class       : SpatRaster 
+dimensions  : 2210, 3490, 1  (nrow, ncol, nlyr)
+resolution  : 100, 100  (x, y)
+extent      : 2485000, 2834000, 1075000, 1296000  (xmin, xmax, ymin, ymax)
+coord. ref. : CH1903+ / LV95 (EPSG:2056) 
+source(s)   : memory
+name        : density_predicted 
+min value   :                 0 
+max value   :               100 </code></pre>
+</div>
+</div>
+<p>Now, export your prediction to a Geotiff with the datatype <code>INT1U</code> and send it to Nils via Mail.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(density_predicted, <span class="st">"./data/raw/Tick_Reports/density_predicted.tif"</span>, <span class="at">datatype =</span> <span class="st">"INT1U"</span>, <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The winner is determined by comparing your predictions with the kernel density estimations that we calculated from the reports in Mai 2021. Let’s illustrate this:</p>
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `tick_reports_test' from data source 
+  `/home/nils/ownCloud/Projekte/2023_Zecken_OpenGeoHub/gh-repos/data-challenge/data/raw/Tick_Reports/tick_reports_TEST.gpkg' 
+  using driver `GPKG'
+Simple feature collection with 1343 features and 5 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: 2487346 ymin: 1077218 xmax: 2775467 ymax: 1289962
+Projected CRS: CH1903+ / LV95</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>density_true <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/raw/Tick_Reports/density_true.tif"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>density_predicted <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/raw/Tick_Reports/density_predicted.tif"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Function </span><span class="al">TBD</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<!---
+ sqrt(global((density_true-density_predicted)^2, mean, na.rm = TRUE)[1,]) 
+--->
+</section>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>Ticks are small arachnids that feed on the blood of mammals, birds and reptiles. Ticks are vectors for several diseases, including Lyme disease, tick-borne encephalitis, babesiosis and anaplasmosis. In Switzerland, tick bites are a common phenomenon. In 2019, 3.1% of the population was infected with Lyme disease. The tick prevention app “tick” was developed by the Institute for Natural Resource Sciences of the Zürcher Hochschule für Angewandte Wissenschaften (ZHAW) in 2015. The app is available for android and ios and provides information on tick prevention and tick bite risk. The user is able to enter tick bites in a diary and is reminded to check for possible disease symptoms. Additionally, the user can enter the location of where the tick bite took place on a map, thus helping to identify tick hotspots. More information can be found <a href="https://www.zhaw.ch/en/lsfm/business-services/natural-resource-sciences/ticks/tick-app/?mdrv=www.zhaw.ch&amp;cHash=a51a3a438004a34df53e9a544e4b070b">here</a>.</p>
+<p>In this manner, over 50k tick bites were collected over a period of several years. This data can be used to identify tick hotspots and to predict tick bite risk based on environmental factors. We have a list of variables that experts think are important for predicting tick bite risk. We want to use machine learning to find out which variables are actually important and to predict tick bite risk for a given location. The goal is to create model which outperforms <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bag.zeckenstichmodell&amp;E=2673880.30&amp;N=1214206.44&amp;zoom=8&amp;layers_opacity=0.75">the existing expert-based model</a>.</p>
+<p>For this, we have the following data available:</p>
+<ul>
+<li><strong>Tick reports</strong>: Tick bites recorded by users of the tick app, 2015 - 2020</li>
+<li><strong>Covariates</strong>: Geodata (raster / vector data from various sources)</li>
+</ul>
+</section>
+<section id="dependent-variable-tick-data" class="level2">
+<h2 class="anchored" data-anchor-id="dependent-variable-tick-data">Dependent variable: Tick data</h2>
+<section id="temporal-dimension" class="level3">
+<h3 class="anchored" data-anchor-id="temporal-dimension">Temporal dimension</h3>
+<p>Every year, the number of users using the app continues to grow and thus the number of recorded tick bites grows rapidly. Here are some figures showing the data from 2015 to 2019.</p>
+<div id="fig-temporal" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-yearly2" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/unnamed-chunk-38-1.png" class="img-fluid figure-img" data-ref-parent="fig-temporal"></p>
+<figcaption class="figure-caption">(a)</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-timeofday" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/unnamed-chunk-39-1.png" class="img-fluid figure-img" data-ref-parent="fig-temporal"></p>
+<figcaption class="figure-caption">(b)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: The first tick bites were recorded in early 2015 and the latest beginning of 2020, more recent data is available. Most Tick bites are recorded May to July, with the peak being in June. Most tick bites are recorded between 20h and 22h. This is probably the instance when tick bites are noticed (e.g.&nbsp;in the shower).</figcaption><p></p>
+</figure>
+</div>
+</section>
+<section id="spatial-accuracy" class="level3">
+<h3 class="anchored" data-anchor-id="spatial-accuracy">Spatial accuracy</h3>
+<p>When specifying the location where the tick bite occurred, the user has the possibility to zoom into the map very closely (see <a href="#fig-zoom">Figure&nbsp;2 (a)</a>). The higher the zoom level the user chooses, the smaller the radius of the red circle. This radius can be used as a proxy of the accuracy of the user’s knowledge of where the tick bite occurred. The distribution of the accuracies is approximately log normal, see <a href="#fig-accuracy">Figure&nbsp;2 (b)</a>. Different versions of the app have different default values for accuracy. These default values are the peaks visible in <a href="#fig-accuracy">Figure&nbsp;2 (b)</a>.</p>
+<div id="fig-spat" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 30.0%;justify-content: center;">
+<div id="fig-zoom" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/spatial_accuracy.jpg" class="img-fluid figure-img" data-ref-parent="fig-spat"></p>
+<figcaption class="figure-caption">(a)</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 70.0%;justify-content: center;">
+<div id="fig-accuracy" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/unnamed-chunk-26-1.png" class="img-fluid figure-img" data-ref-parent="fig-spat"></p>
+<figcaption class="figure-caption">(b)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Accuracy of the tick bite locations can be inferred from the size of the radius the user provided when recording the tick bite.</figcaption><p></p>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-predictors" class="level2">
+<h2 class="anchored" data-anchor-id="sec-predictors">Covariates / Geodata</h2>
+<p>To save you some time, we have put together a list of predictors which the experts think are important for modelling tick risk. This data will be made available to you via a zip file which you can download.</p>
+<p>Predicting tick bite risk is not only about predicting the occurance of ticks, but also the occurance of people. Formally, Risk is defined as follows:</p>
+<p><span class="math display">\[\text{Risk} = \text{Hazard} \times \text{Exposure}\]</span></p>
+<p>This means that the risk is higher for areas not only where the <em>Hazard</em> is higher (i.e.&nbsp;more ticks), but also where <em>Exposure</em> is higher, i.e.&nbsp;more people. In other words, we must correct our data for population before making any predictions about the occurrence of ticks, as <a href="#fig-spatial">Figure&nbsp;3</a> shows. If you are not familiar with swiss geography, the hotspots of tick bites are clearly around major cities like Zurich, Bern etc.</p>
+<section id="modelling-exposure" class="level3">
+<h3 class="anchored" data-anchor-id="modelling-exposure">Modelling Exposure</h3>
+<p>To model exposure, the most important predictor is population density, which is available at a 100m resolution here: <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bfs.volkszaehlung-bevoelkerungsstatistik_einwohner&amp;layers_timestamp=2021&amp;E=2677260.22&amp;N=1214005.67&amp;zoom=10">Population density</a>: A raster dataset with 100m resolution with population count.</p>
+<div id="fig-spatial" class="quarto-layout-panel">
+<figure class="figure">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-spatial-raw" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/unnamed-chunk-14-1.png" class="img-fluid figure-img" data-ref-parent="fig-spatial"></p>
+<figcaption class="figure-caption">(a) Raw data points</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell quarto-layout-cell-subref" style="flex-basis: 50.0%;justify-content: center;">
+<div id="fig-spatial-kde" class="quarto-figure quarto-figure-center anchored">
+<figure class="figure">
+<p><img src="images/unnamed-chunk-15-2.png" class="img-fluid figure-img" data-ref-parent="fig-spatial"></p>
+<figcaption class="figure-caption">(b) Point density (5km kernel filter)</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p></p><figcaption class="figure-caption">Figure&nbsp;3: Most tick bites occur are reported around big cities</figcaption><p></p>
+</figure>
+</div>
+<p>To get you started, we provide you with a high resolution population density dataset.</p>
+<div class="cell">
+<details>
+<summary>Code on how we prepared the population density data (irrelavant to you)</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>population_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/raw/Population/"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span>(population_zips, \(x){</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    csv <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"STATPOP"</span>,<span class="fu">str_sub</span>(<span class="fu">basename</span>(x), <span class="dv">14</span>, <span class="dv">17</span>),<span class="st">".csv"</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    file_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    csv_path <span class="ot">&lt;-</span> file_names[<span class="fu">str_detect</span>(file_names, csv)]</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> csv_path, <span class="at">exdir =</span> <span class="st">"data/prepared/Population"</span>, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here is how you can now import these raster datasets</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/prepared/Population/"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(x){</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">read_delim</span>(x, <span class="at">col_select =</span> <span class="fu">c</span>(E_KOORD, N_KOORD, <span class="fu">matches</span>(<span class="st">"B</span><span class="sc">\\</span><span class="st">d{2}BTOT"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rast</span>()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">|&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rast</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="modelling-hazard" class="level3">
+<h3 class="anchored" data-anchor-id="modelling-hazard">Modelling Hazard</h3>
+<p>A simple method to determine the relevant features to predict <em>hazard</em> is by consulting the method used to create the <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bag.zeckenstichmodell&amp;E=2673880.30&amp;N=1214206.44&amp;zoom=8&amp;layers_opacity=0.75">the existing expert-based model</a>.</p>
+<section id="land-use-cover" class="level4">
+<h4 class="anchored" data-anchor-id="land-use-cover">Land use cover</h4>
+<p><strong>Land use statistics</strong></p>
+<p>The main input in the mentioned expert based model is the <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bfs.arealstatistik&amp;layers_opacity=0.75&amp;layers_timestamp=2018">Land use statistics</a> dataset. This is a raster with a 100m resolution with 72 basic categories. These were classified according to a scheme, a sample of which is displayed in <a href="#tbl-asno04">Table&nbsp;1</a>. The full classification table is availalable in the zip file (<code>data/prepared/Arealstatistik/Arealstatistik_expert-opinion.csv</code>).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="tbl-asno04" class="anchored">
+<table class="table table-sm table-striped small">
+<caption>Table&nbsp;1: A sample of the expert based classification of the 72 different land use categories in the <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bfs.arealstatistik&amp;layers_opacity=0.75&amp;layers_timestamp=2018">Arealstatistik</a> dataset. The classes (numbers 0 - 4) correspond to the tick risk low → high (no risk, moderate risk, high risk, very high risk).</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;">Category</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: right;">Class</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">47</td>
+<td style="text-align: left;">Overgrown Alpine and Jura Pastures</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">51</td>
+<td style="text-align: left;">Narrow Forest</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">56</td>
+<td style="text-align: left;">Dissolved Forest (on Unproductive Land)</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">37</td>
+<td style="text-align: left;">Orchards</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">29</td>
+<td style="text-align: left;">Construction Sites</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">Highways</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<p>We obtained the data from <a href="https://www.bfs.admin.ch/bfs/de/home/dienstleistungen/geostat/geodaten-bundesstatistik/boden-nutzung-bedeckung-eignung/arealstatistik-schweiz.assetdetail.25885691.html">here</a> and prepared a raster dataset in the following manner:</p>
+<div class="cell">
+<details>
+<summary>data preperation</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>arealstat_path <span class="ot">&lt;-</span> <span class="st">"./data/raw/Arealstatistik/ag-b-00.03-37-area-csv.csv"</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># important are the columns: E_COORD N_COORD AS18_72</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># (x / y coordinates in EPSG 2056 and landuse in 72 cateogories for the years 2013 - 2018</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co"># see be-b-00.03-37-area-var-v01.xlsx in ag-b-00.03-37-area-csv-APPENDIX.zip</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>areal <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(arealstat_path, <span class="st">";"</span>, <span class="at">col_select =</span> <span class="fu">c</span>(E_COORD, N_COORD, AS18_72))</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>arealstat_noas04 <span class="ot">&lt;-</span> <span class="fu">rast</span>(areal, <span class="at">crs =</span> <span class="st">"epsg:2056"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(arealstat_noas04, <span class="st">"./data/prepared/Arealstatistik/AS18_72.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p><strong>CORINE Landcover</strong></p>
+<p>The CORINE Landcover (CLC) dataset is available for Switzerland as a vector dataset <a href="https://www.wsl.ch/en/projects/corine-switzerland.html">here</a>. We did not do any preperation on this dataset beforehand.</p>
+</section>
+<section id="elevation" class="level4">
+<h4 class="anchored" data-anchor-id="elevation">Elevation</h4>
+<p>Temperature has a big impact on the occurance of ticks. The mentioned expert based model used elevation as a proxy for temperature and removed risk classes based according to the following system:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Elevation</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1200 - 1600</td>
+<td>minus 1 class</td>
+</tr>
+<tr class="even">
+<td>1600 - 1900</td>
+<td>minus 2 classes</td>
+</tr>
+<tr class="odd">
+<td>&gt; 1900</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+<p>The <a href="https://www.swisstopo.admin.ch/en/geodata/height/dhm25.html">Digital height model DHM25</a> is a dataset with 25 m resolution describing elevation.</p>
+<div class="cell">
+<details>
+<summary>data preperation</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dhm_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/DHM/"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"data/raw/DHM/DHM25_MM_ASCII_GRID.zip"</span>, <span class="at">exdir =</span> dhm_path)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/dhm25_grid_raster.asc"</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(dhm25, <span class="fu">file.path</span>(dhm_path, <span class="st">"DHM25.tif"</span>))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(<span class="fu">list.files</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/"</span>),<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+<section id="weather" class="level4">
+<h4 class="anchored" data-anchor-id="weather">Weather</h4>
+<p>In addition to the static model linked above, the mobile application includes a risk model that additionally takes current weather data into account. According to our expert, the following variables are important:</p>
+<ul>
+<li>mean, max. and min. daily temperature</li>
+<li>relative humidity</li>
+<li>percipitation sum over 24h</li>
+<li>relative sunshine duration (0 - 100%)</li>
+</ul>
+<p>These variables (or a combination of them) raised or lowered the risk class according to the following system:</p>
+<table class="table">
+<colgroup>
+<col style="width: 83%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Classification</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>relative humidity &lt; 30%</td>
+<td>minus 2 classes</td>
+</tr>
+<tr class="even">
+<td>relative humidity 30 - 70 %</td>
+<td>minus 1 class</td>
+</tr>
+<tr class="odd">
+<td>percipitation 24h-sum is between 2-15mm AND temperature &gt; 5°C</td>
+<td>plus 1 class</td>
+</tr>
+<tr class="even">
+<td>max daily temperature is &gt; 30°C</td>
+<td>minus 2 classes</td>
+</tr>
+<tr class="odd">
+<td>mean daily temperature is &gt; 30°C</td>
+<td>minus 1 class</td>
+</tr>
+<tr class="even">
+<td>relative sunshine &gt; 50% AND mean daily temperature is &gt; 30°</td>
+<td>minus 2 classes</td>
+</tr>
+<tr class="odd">
+<td>min daily temperature is &lt; 5°C AND relative sunshine is &lt; 20%</td>
+<td>class 0</td>
+</tr>
+<tr class="even">
+<td>mean daily temperature &lt;5°C AND exposition is south AND relative sunshine is 20 - 60%</td>
+<td>minus 2 classes</td>
+</tr>
+<tr class="odd">
+<td>mean daily temperature &lt;5°C AND exposition is south AND relative sunshine is &gt; 60%</td>
+<td>minus 1 class</td>
+</tr>
+<tr class="even">
+<td>mean daily temperature &lt;5°C AND exposition ist not south</td>
+<td>class 0</td>
+</tr>
+<tr class="odd">
+<td>mean daily temperature &lt;5°C AND exposition is south AND relative sunshine is &lt; 50%</td>
+<td>minus 2 classes</td>
+</tr>
+<tr class="even">
+<td>mean daily temperature &lt;5°C AND exposition is south AND relative sunshine is &gt; 50%</td>
+<td>minus 1 class</td>
+</tr>
+</tbody>
+</table>
+<p>We have prepared some weather data from the <a href="https://www.meteoswiss.admin.ch/">Federal Office of Meteorology and Climatology MeteoSwiss</a> (Meteo Schweiz). We will provide you with the following datasets (years 2015 - 2021):</p>
+<ul>
+<li>RhiresM: Monthly precipitation</li>
+<li>SrelM: Monthly relative sunshine duration</li>
+<li>TabsM: Monthly mean temperature</li>
+</ul>
+<p>A full list of the available variables can be found <a href="https://www.meteoschweiz.admin.ch/dam/jcr:215c313a-dc13-4b67-bca0-dbd966597f9a/ProdDoc_Cover-dfie.pdf">here</a>.</p>
+<p>This is how we prepared the data:</p>
+<div class="cell">
+<details>
+<summary>Data preperation</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>files_monthly <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RhiresM_61_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"SrelM_71_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"TabsM_61_21_ch01r.swiss.lv95.zip"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>weather_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/Weather"</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/Wetter/Klimadaten_Feb22.zip"</span>, <span class="at">files =</span> <span class="fu">file.path</span>(<span class="st">"Klimadaten_Feb22"</span>, files_monthly), <span class="at">exdir =</span> weather_path, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>weather_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(weather_path, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(weather_zips, \(x){</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># browser()</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    nc_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_names[<span class="fu">as.integer</span>(<span class="fu">str_match</span>(nc_names, <span class="st">"(</span><span class="sc">\\</span><span class="st">d{4})</span><span class="sc">\\</span><span class="st">d{8}"</span>)[,<span class="dv">2</span>]) <span class="sc">&gt;=</span> <span class="dv">2015</span>]</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_select[<span class="sc">!</span><span class="fu">is.na</span>(nc_select)]</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    exdir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(weather_path, <span class="fu">str_match</span>(<span class="fu">basename</span>(x), <span class="st">"([a-zA-Z]+)"</span>)[,<span class="dv">2</span>])</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> nc_select, <span class="at">exdir =</span> exdir, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(weather_zips)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</section>
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>If you rescales your values to 1 - 100 and export it with <code>datatype = "INT1U"</code> (<em>eight bit unsigned integer</em>), your file size is reduced by about 70%.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

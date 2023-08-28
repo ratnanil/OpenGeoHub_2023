@@ -1,0 +1,10 @@
+Readme.qmd
+data
+.vscode
+index.qmd
+
+*
+!.gitignore
+!index.html
+!index_files
+!images
