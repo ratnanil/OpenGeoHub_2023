@@ -417,6 +417,10 @@ max value   :               100 </code></pre>
 <h2 class="anchored" data-anchor-id="dependent-variable-tick-data">Dependent variable: Tick data</h2>
 <section id="temporal-dimension" class="level3">
 <h3 class="anchored" data-anchor-id="temporal-dimension">Temporal dimension</h3>
+<ul>
+<li>dataset: <code>prepared/Tick_Reports/tick_reports_traning.gpkg</code></li>
+<li>CRS: <code>EPSG: 2056</code></li>
+</ul>
 <p>Every year, the number of users using the app continues to grow and thus the number of recorded tick bites grows rapidly. Here are some figures showing the data from 2015 to 2019.</p>
 <div id="fig-temporal" class="quarto-layout-panel">
 <figure class="figure">
@@ -478,6 +482,14 @@ max value   :               100 </code></pre>
 <p>This means that the risk is higher for areas not only where the <em>Hazard</em> is higher (i.e.&nbsp;more ticks), but also where <em>Exposure</em> is higher, i.e.&nbsp;more people. In other words, we must correct our data for population before making any predictions about the occurrence of ticks, as <a href="#fig-spatial">Figure&nbsp;3</a> shows. If you are not familiar with swiss geography, the hotspots of tick bites are clearly around major cities like Zurich, Bern etc.</p>
 <section id="modelling-exposure" class="level3">
 <h3 class="anchored" data-anchor-id="modelling-exposure">Modelling Exposure</h3>
+<ul>
+<li>Dataset: <code>prepared/Population/STATPOP2011.csv</code> to <code>prepared/Population/STATPOP2021.csv</code></li>
+<li>CRS:
+<ul>
+<li>columns <code>X_KOORD</code> and <code>Y_KOORD</code>: <code>EPSG: 21781</code></li>
+<li>columns <code>E_KOORD</code> and <code>N_KOORD</code>: <code>EPSG: 2056</code></li>
+</ul></li>
+</ul>
 <p>To model exposure, the most important predictor is population density, which is available at a 100m resolution here: <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bfs.volkszaehlung-bevoelkerungsstatistik_einwohner&amp;layers_timestamp=2021&amp;E=2677260.22&amp;N=1214005.67&amp;zoom=10">Population density</a>: A raster dataset with 100m resolution with population count.</p>
 <div id="fig-spatial" class="quarto-layout-panel">
 <figure class="figure">
@@ -534,6 +546,10 @@ max value   :               100 </code></pre>
 <section id="land-use-cover" class="level4">
 <h4 class="anchored" data-anchor-id="land-use-cover">Land use cover</h4>
 <p><strong>Land use statistics</strong></p>
+<ul>
+<li>data: <code>data/prepared/Arealstatistik/AS18_72.tif</code></li>
+<li>CRS: <code>EPSG: 2056</code></li>
+</ul>
 <p>The main input in the mentioned expert based model is the <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bfs.arealstatistik&amp;layers_opacity=0.75&amp;layers_timestamp=2018">Land use statistics</a> dataset. This is a raster with a 100m resolution with 72 basic categories. These were classified according to a scheme, a sample of which is displayed in <a href="#tbl-asno04">Table&nbsp;1</a>. The full classification table is availalable in the zip file (<code>data/prepared/Arealstatistik/Arealstatistik_expert-opinion.csv</code>).</p>
 <div class="cell">
 <div class="cell-output-display">
@@ -549,34 +565,34 @@ max value   :               100 </code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">63</td>
-<td style="text-align: left;">Flood Protection Structures</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">One- and Two-Family Houses</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">Periphery of Public Buildings</td>
 <td style="text-align: right;">2</td>
 </tr>
-<tr class="odd">
-<td style="text-align: right;">29</td>
-<td style="text-align: left;">Construction Sites</td>
-<td style="text-align: right;">0</td>
-</tr>
 <tr class="even">
-<td style="text-align: right;">43</td>
-<td style="text-align: left;">Home Pastures</td>
-<td style="text-align: right;">2</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">72</td>
-<td style="text-align: left;">Glaciers, Firn</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">18</td>
-<td style="text-align: left;">Roadside Greenery</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: left;">Stony Alpine and Jura Pastures</td>
 <td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">52</td>
+<td style="text-align: left;">Afforestation</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">68</td>
+<td style="text-align: left;">Alpine Sports Infrastructure</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">Periphery of Agricultural Buildings</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">Highways</td>
+<td style="text-align: right;">0</td>
 </tr>
 </tbody>
 </table>
@@ -600,10 +616,18 @@ max value   :               100 </code></pre>
 </details>
 </div>
 <p><strong>CORINE Landcover</strong></p>
+<ul>
+<li>dataset: <code>prepared/Corine_Landcover/CLC_CH_2018.shp</code></li>
+<li>CRS: <code>EPSG: 21781</code></li>
+</ul>
 <p>The CORINE Landcover (CLC) dataset is available for Switzerland as a vector dataset <a href="https://www.wsl.ch/en/projects/corine-switzerland.html">here</a>. We did not do any preperation on this dataset beforehand.</p>
 </section>
 <section id="elevation" class="level4">
 <h4 class="anchored" data-anchor-id="elevation">Elevation</h4>
+<ul>
+<li>dataset: <code>prepared/Corine_Landcover/CLC_CH_2018.shp</code></li>
+<li>CRS: <code>EPSG: 21781</code></li>
+</ul>
 <p>Temperature has a big impact on the occurance of ticks. The mentioned expert based model used elevation as a proxy for temperature and removed risk classes based according to the following system:</p>
 <table class="table">
 <thead>
@@ -644,6 +668,10 @@ max value   :               100 </code></pre>
 </section>
 <section id="weather" class="level4">
 <h4 class="anchored" data-anchor-id="weather">Weather</h4>
+<ul>
+<li>Dataset: <code>prepared/Weather</code></li>
+<li>CRS: <code>EPSG: 2056</code></li>
+</ul>
 <p>In addition to the static model linked above, the mobile application includes a risk model that additionally takes current weather data into account. According to our expert, the following variables are important:</p>
 <ul>
 <li>mean, max. and min. daily temperature</li>
