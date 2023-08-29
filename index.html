@@ -132,6 +132,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The tick prevention app “tick” for <a href="https://apps.apple.com/ch/app/zecke/id946829736">iOS</a> and <a href="https://play.google.com/store/apps/details?id=com.garzotto.zecke">android</a> is a mobile application that provides information on tick prevention and tick bite risk. The user is able to enter tick bites in a diary and is reminded to check for possible disease symptoms. Additionally, the user can enter the location of where the tick bite took place on a map, thus helping to identify tick hotspots. More information can be found <a href="https://www.zhaw.ch/en/lsfm/business-services/natural-resource-sciences/ticks/tick-app/?mdrv=www.zhaw.ch&amp;cHash=a51a3a438004a34df53e9a544e4b070b">here</a>.</p>
 <p>In this manner, over 50k tick bites were collected over a period of several years. This data can be used to identify tick hotspots and to predict tick bite risk based on environmental factors. We have a list of variables that experts think are important for predicting tick bite risk. We want to use machine learning to find out which variables are actually important and to predict tick bite risk for a given location. The goal is to create a model which outperforms <a href="https://map.geo.admin.ch/?lang=en&amp;topic=ech&amp;bgLayer=ch.swisstopo.pixelkarte-farbe&amp;layers=ch.bag.zeckenstichmodell&amp;E=2673880.30&amp;N=1214206.44&amp;zoom=8&amp;layers_opacity=0.75">the existing expert-based model</a>.</p>
 <p>You can download the whole dummy dataset <a href="https://filesender.switch.ch/filesender2/?s=download&amp;token=ba50d7d8-f59c-4f38-9204-aef2afb6733e">here</a>. Password is provided in the Mattermost channel. The real datset will be provided after signing the NDA.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In the first version of the zip files with the covariate data, we provided you with a mix of different fileformats and projections. Sorry for that! I’ve create a new zip file where I’ve cleaned up some of the datasets and harmonized them to geotiffs with the EPSG Code 2056. You can download the new Zip File <a href="https://filesender.switch.ch/filesender2/?s=download&amp;token=67fe19e5-82d6-45bc-a508-822a12b2c936">here</a>.</p>
+</div>
+</div>
 <div class="cell">
 <details>
 <summary>Libraries used to create this report</summary>
@@ -531,13 +544,46 @@ max value   :               100 </code></pre>
 </details>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># here is how you can now import these raster datasets</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/prepared/Population/"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(x){</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">read_delim</span>(x, <span class="at">col_select =</span> <span class="fu">c</span>(E_KOORD, N_KOORD, <span class="fu">matches</span>(<span class="st">"B</span><span class="sc">\\</span><span class="st">d{2}BTOT"</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rast</span>()</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">|&gt;</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rast</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<details>
+<summary>Data preperation (part 2, 2023-08-29)</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pop_csvs <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"data/prepared/Population/"</span>, <span class="st">"STATPOP"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>pop_csvs <span class="ot">&lt;-</span> pop_csvs[<span class="fu">as.integer</span>(<span class="fu">str_match</span>(<span class="fu">basename</span>(pop_csvs), <span class="st">"</span><span class="sc">\\</span><span class="st">d{4}"</span>))<span class="sc">&gt;=</span><span class="dv">2015</span>]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">map</span>(pop_csvs, \(x){</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">read_delim</span>(x, <span class="at">col_select =</span> <span class="fu">c</span>(E_KOORD, N_KOORD, <span class="fu">matches</span>(<span class="st">"B</span><span class="sc">\\</span><span class="st">d{2}BTOT"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">rast</span>()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    }) <span class="sc">|&gt;</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rast</span>()</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="co"># add crs information</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">crs</span>(population) <span class="ot">&lt;-</span> <span class="st">"epsg:2056"</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>dates <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"20"</span>,<span class="fu">str_match</span>(<span class="fu">names</span>(population), <span class="st">"B(</span><span class="sc">\\</span><span class="st">d{2})BTOT"</span>)[,<span class="dv">2</span>],<span class="st">"-01-01"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.Date</span>()</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">time</span>(population) <span class="ot">&lt;-</span> dates</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(population) <span class="ot">&lt;-</span> dates</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(population, <span class="st">"data/prepared_2/Population/Population_2015-2021.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>population <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"data/prepared_2/Population/Population_2015-2021.tif"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(population)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to simplify the problem, we can simply take the mean over all years</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>population <span class="sc">|&gt;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>() <span class="sc">|&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
 <section id="modelling-hazard" class="level3">
@@ -565,33 +611,33 @@ max value   :               100 </code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">10</td>
-<td style="text-align: left;">Periphery of Public Buildings</td>
-<td style="text-align: right;">2</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">48</td>
-<td style="text-align: left;">Stony Alpine and Jura Pastures</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: left;">Watercourses</td>
 <td style="text-align: right;">1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: right;">52</td>
 <td style="text-align: left;">Afforestation</td>
 <td style="text-align: right;">3</td>
 </tr>
-<tr class="even">
-<td style="text-align: right;">68</td>
-<td style="text-align: left;">Alpine Sports Infrastructure</td>
+<tr class="odd">
+<td style="text-align: right;">70</td>
+<td style="text-align: left;">Scree, Sand</td>
 <td style="text-align: right;">0</td>
 </tr>
+<tr class="even">
+<td style="text-align: right;">40</td>
+<td style="text-align: left;">Horticultural Areas</td>
+<td style="text-align: right;">1</td>
+</tr>
 <tr class="odd">
-<td style="text-align: right;">12</td>
-<td style="text-align: left;">Periphery of Agricultural Buildings</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: left;">Orchards</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">15</td>
-<td style="text-align: left;">Highways</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: left;">Paved Railway Areas</td>
 <td style="text-align: right;">0</td>
 </tr>
 </tbody>
@@ -603,30 +649,83 @@ max value   :               100 </code></pre>
 <div class="cell">
 <details>
 <summary>data preperation</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>arealstat_path <span class="ot">&lt;-</span> <span class="st">"./data/raw/Arealstatistik/ag-b-00.03-37-area-csv.csv"</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># important are the columns: E_COORD N_COORD AS18_72</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># (x / y coordinates in EPSG 2056 and landuse in 72 cateogories for the years 2013 - 2018</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># see be-b-00.03-37-area-var-v01.xlsx in ag-b-00.03-37-area-csv-APPENDIX.zip</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>areal <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(arealstat_path, <span class="st">";"</span>, <span class="at">col_select =</span> <span class="fu">c</span>(E_COORD, N_COORD, AS18_72))</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>arealstat_noas04 <span class="ot">&lt;-</span> <span class="fu">rast</span>(areal, <span class="at">crs =</span> <span class="st">"epsg:2056"</span>)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(arealstat_noas04, <span class="st">"./data/prepared/Arealstatistik/AS18_72.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>arealstat_path <span class="ot">&lt;-</span> <span class="st">"./data/raw/Arealstatistik/ag-b-00.03-37-area-csv.csv"</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># important are the columns: E_COORD N_COORD AS18_72</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># (x / y coordinates in EPSG 2056 and landuse in 72 cateogories for the years 2013 - 2018</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># see be-b-00.03-37-area-var-v01.xlsx in ag-b-00.03-37-area-csv-APPENDIX.zip</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>areal <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(arealstat_path, <span class="st">";"</span>, <span class="at">col_select =</span> <span class="fu">c</span>(E_COORD, N_COORD, AS18_72))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>arealstat_noas04 <span class="ot">&lt;-</span> <span class="fu">rast</span>(areal, <span class="at">crs =</span> <span class="st">"epsg:2056"</span>)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(arealstat_noas04, <span class="st">"./data/prepared/Arealstatistik/AS18_72.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+<p>To import the dataset:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>as18_72 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/prepared/Arealstatistik/AS18_72.tif"</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(as18_72)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <p><strong>CORINE Landcover</strong></p>
 <ul>
-<li>dataset: <code>prepared/Corine_Landcover/CLC_CH_2018.shp</code></li>
-<li>CRS: <code>EPSG: 21781</code></li>
+<li>dataset: <code>prepared/Corine_Landcover/CLC_CH_2018.shp</code> (<code>EPSG: 21781</code>)</li>
+<li>dataset NEW: <code>prepared_2/Corine_Landcover/CLC_CH_2018.shp</code> (<code>EPSG: 2056</code>)</li>
+<li>dataset NEW: <code>prepared_2/Corine_Landcover/CLC_CH_2018.tif</code> (<code>EPSG: 2056</code>)</li>
 </ul>
 <p>The CORINE Landcover (CLC) dataset is available for Switzerland as a vector dataset <a href="https://www.wsl.ch/en/projects/corine-switzerland.html">here</a>. We did not do any preperation on this dataset beforehand.</p>
+<div class="cell">
+<details>
+<summary>Data preperation (part 2, 2023-08-29)</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>clc2018 <span class="ot">&lt;-</span> <span class="fu">read_sf</span>(<span class="st">"data/prepared/Corine_Landcover/CLC_CH_2018.shp"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># project into EPSG 2056</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>clc2018 <span class="ot">&lt;-</span> <span class="fu">st_transform</span>(clc2018, <span class="dv">2056</span>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># rasterize the dataset</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>switzerland_mask <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/prepared/Mask/Mask.tif"</span>)</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>clc2018<span class="sc">$</span>CODE_18 <span class="ot">&lt;-</span> <span class="fu">as.integer</span>(clc2018<span class="sc">$</span>CODE_18)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>clc2018_rast <span class="ot">&lt;-</span> <span class="fu">rasterize</span>(clc2018, switzerland_mask, <span class="st">"CODE_18"</span>)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(clc2018, <span class="st">"./data/prepared_2/Corine_Landcover/CLC_CH_2018.gpkg"</span>)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(clc2018_rast, <span class="st">"./data/prepared_2/Corine_Landcover/CLC_CH_2018.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>to import and plot:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>clc2018 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"./data/prepared_2/Corine_Landcover/CLC_CH_2018.gpkg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Reading layer `CLC_CH_2018' from data source 
+  `/home/nils/ownCloud/Projekte/2023_Zecken_OpenGeoHub/gh-repos/data-challenge/data/prepared_2/Corine_Landcover/CLC_CH_2018.gpkg' 
+  using driver `GPKG'
+Simple feature collection with 17425 features and 7 fields
+Geometry type: POLYGON
+Dimension:     XY
+Bounding box:  xmin: 2484342 ymin: 1074297 xmax: 2834836 ymax: 1296924
+Projected CRS: CH1903+ / LV95</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clc2018)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>clc2018_raster <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/prepared_2/Corine_Landcover/CLC_CH_2018.tif"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(clc2018_raster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-20-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 </section>
 <section id="elevation" class="level4">
 <h4 class="anchored" data-anchor-id="elevation">Elevation</h4>
 <ul>
-<li>dataset: <code>prepared/Corine_Landcover/CLC_CH_2018.shp</code></li>
-<li>CRS: <code>EPSG: 21781</code></li>
+<li>dataset: <code>./data/prepared/DHM/DHM25.tif</code> (CRS: <code>EPSG: 21781</code>)</li>
+<li>dataset: <code>./data/prepared_2/DHM/DHM25_2056.tif</code> (CRS: <code>EPSG: 2056</code>) (<strong>NEW</strong>)</li>
 </ul>
 <p>Temperature has a big impact on the occurance of ticks. The mentioned expert based model used elevation as a proxy for temperature and removed risk classes based according to the following system:</p>
 <table class="table">
@@ -655,21 +754,44 @@ max value   :               100 </code></pre>
 <div class="cell">
 <details>
 <summary>data preperation</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dhm_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/DHM/"</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"data/raw/DHM/DHM25_MM_ASCII_GRID.zip"</span>, <span class="at">exdir =</span> dhm_path)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/dhm25_grid_raster.asc"</span>))</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(dhm25, <span class="fu">file.path</span>(dhm_path, <span class="st">"DHM25.tif"</span>))</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(<span class="fu">list.files</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/"</span>),<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dhm_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/DHM/"</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"data/raw/DHM/DHM25_MM_ASCII_GRID.zip"</span>, <span class="at">exdir =</span> dhm_path)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/dhm25_grid_raster.asc"</span>))</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(dhm25, <span class="fu">file.path</span>(dhm_path, <span class="st">"DHM25.tif"</span>))</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(<span class="fu">list.files</span>(<span class="fu">file.path</span>(dhm_path, <span class="st">"ASCII_GRID_1part/"</span>),<span class="at">full.names =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+<div class="cell">
+<details>
+<summary>Data preperation (part 2, 2023-08-29)</summary>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/prepared/DHM/DHM25.tif"</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># set CRS information</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">crs</span>(dhm25) <span class="ot">&lt;-</span> <span class="st">"epsg: 21781"</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="co"># this takes a lot of time! I will provide the reprojected data as a download</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">project</span>(dhm25, <span class="st">"epsg: 2056"</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="fu">writeRaster</span>(dhm25, <span class="st">"./data/prepared_2/DHM/DHM25_2056.tif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To import the data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>dhm25 <span class="ot">&lt;-</span> <span class="fu">rast</span>(<span class="st">"./data/prepared/DHM/DHM25_2056.tif"</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dhm25)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
 <section id="weather" class="level4">
 <h4 class="anchored" data-anchor-id="weather">Weather</h4>
 <ul>
-<li>Dataset: <code>prepared/Weather</code></li>
+<li>Dataset: <code>prepared/Weather</code> (NEW: <code>prepared_2/Weather2</code>)</li>
 <li>CRS: <code>EPSG: 2056</code></li>
 </ul>
 <p>In addition to the static model linked above, the mobile application includes a risk model that additionally takes current weather data into account. According to our expert, the following variables are important:</p>
@@ -753,30 +875,75 @@ max value   :               100 </code></pre>
 <div class="cell">
 <details>
 <summary>Data preperation</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>files_monthly <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RhiresM_61_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"SrelM_71_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"TabsM_61_21_ch01r.swiss.lv95.zip"</span>)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>weather_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/Weather"</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/Wetter/Klimadaten_Feb22.zip"</span>, <span class="at">files =</span> <span class="fu">file.path</span>(<span class="st">"Klimadaten_Feb22"</span>, files_monthly), <span class="at">exdir =</span> weather_path, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>weather_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(weather_path, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(weather_zips, \(x){</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># browser()</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    nc_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_names[<span class="fu">as.integer</span>(<span class="fu">str_match</span>(nc_names, <span class="st">"(</span><span class="sc">\\</span><span class="st">d{4})</span><span class="sc">\\</span><span class="st">d{8}"</span>)[,<span class="dv">2</span>]) <span class="sc">&gt;=</span> <span class="dv">2015</span>]</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_select[<span class="sc">!</span><span class="fu">is.na</span>(nc_select)]</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    exdir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(weather_path, <span class="fu">str_match</span>(<span class="fu">basename</span>(x), <span class="st">"([a-zA-Z]+)"</span>)[,<span class="dv">2</span>])</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> nc_select, <span class="at">exdir =</span> exdir, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(weather_zips)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>files_monthly <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"RhiresM_61_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"SrelM_71_21_ch01r.swiss.lv95.zip"</span>, <span class="st">"TabsM_61_21_ch01r.swiss.lv95.zip"</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>weather_path <span class="ot">&lt;-</span> <span class="st">"./data/prepared/Weather"</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">unzip</span>(<span class="st">"./data/raw/Wetter/Klimadaten_Feb22.zip"</span>, <span class="at">files =</span> <span class="fu">file.path</span>(<span class="st">"Klimadaten_Feb22"</span>, files_monthly), <span class="at">exdir =</span> weather_path, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>weather_zips <span class="ot">&lt;-</span> <span class="fu">list.files</span>(weather_path, <span class="at">pattern =</span> <span class="st">"</span><span class="sc">\\</span><span class="st">.zip$"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sapply</span>(weather_zips, \(x){</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># browser()</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    nc_names <span class="ot">&lt;-</span> <span class="fu">unzip</span>(x, <span class="at">list =</span> <span class="cn">TRUE</span>)<span class="sc">$</span>Name</span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_names[<span class="fu">as.integer</span>(<span class="fu">str_match</span>(nc_names, <span class="st">"(</span><span class="sc">\\</span><span class="st">d{4})</span><span class="sc">\\</span><span class="st">d{8}"</span>)[,<span class="dv">2</span>]) <span class="sc">&gt;=</span> <span class="dv">2015</span>]</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    nc_select <span class="ot">&lt;-</span> nc_select[<span class="sc">!</span><span class="fu">is.na</span>(nc_select)]</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>    exdir <span class="ot">&lt;-</span> <span class="fu">file.path</span>(weather_path, <span class="fu">str_match</span>(<span class="fu">basename</span>(x), <span class="st">"([a-zA-Z]+)"</span>)[,<span class="dv">2</span>])</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">unzip</span>(x, <span class="at">files =</span> nc_select, <span class="at">exdir =</span> exdir, <span class="at">junkpaths =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="fu">file.remove</span>(weather_zips)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+</div>
+<div class="cell">
+<details>
+<summary>Data preperation (part 2, 2023-08-29)</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>weather_files <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"./data/prepared/Weather"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">.nc"</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="fu">map</span>(weather_files, \(file_i){</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  rast_i <span class="ot">&lt;-</span> <span class="fu">rast</span>(file_i)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  from_to <span class="ot">&lt;-</span> <span class="fu">str_match</span>(file_i, <span class="st">"(</span><span class="sc">\\</span><span class="st">d{8})</span><span class="sc">\\</span><span class="st">d{4}_(</span><span class="sc">\\</span><span class="st">d{8})</span><span class="sc">\\</span><span class="st">d{4}"</span>)[,<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>] <span class="sc">|&gt;</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as.Date</span>(<span class="at">format =</span> <span class="st">"%Y%m%d"</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  measurement <span class="ot">&lt;-</span> <span class="fu">str_match</span>(<span class="fu">basename</span>(file_i), <span class="st">"^[a-zA-Z]+"</span>)[,<span class="dv">1</span>]</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  new_filepath <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="st">"./data/prepared_2/Weather"</span>,measurement)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dir.create</span>(new_filepath,<span class="at">recursive =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  new_filename <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="fu">paste</span>(from_to, <span class="at">collapse =</span> <span class="st">"_"</span>), <span class="st">".tif"</span>)</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>  times <span class="ot">&lt;-</span> <span class="fu">seq</span>(from_to[<span class="dv">1</span>], from_to[<span class="dv">2</span>], <span class="at">by =</span> <span class="st">"month"</span>)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">time</span>(rast_i) <span class="ot">&lt;-</span> times</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crs</span>(rast_i) <span class="ot">&lt;-</span> <span class="st">"epsg:2056"</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">writeRaster</span>(rast_i, <span class="fu">file.path</span>(new_filepath, new_filename), <span class="at">overwrite =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>To import the daatset:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>weather_files2 <span class="ot">&lt;-</span> <span class="fu">list.files</span>(<span class="st">"./data/prepared/Weather2"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">.tif$"</span>, <span class="at">recursive =</span> <span class="cn">TRUE</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>rhires_2015 <span class="ot">&lt;-</span> <span class="fu">rast</span>(weather_files2[<span class="dv">1</span>])</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(rhires_2015)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># to get the mean over all months</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(rhires_2015) <span class="sc">|&gt;</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-26-2.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
 <section id="other-data-sources" class="level4">
